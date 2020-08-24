@@ -111,8 +111,8 @@ unsafe impl RawRwLockDowngrade for RawRwSpinlock {
 /// A read-write lock that uses a spinlock internally.
 pub type RwLock<T> = LARwLock<T, RawRwSpinlock>;
 /// A read guard for the read-write lock.
-pub type RwLockReadGuard<'a, T> = LARwLockReadGuard<'a, T>;
+pub type RwLockReadGuard<'a, T> = LARwLockReadGuard<'a, RawRwSpinlock, T>;
 /// A write guard fo the read-write lock.
-pub type RwLockWriteGuard<'a, T> = LARwLockWriteGuard<'a, T>;
+pub type RwLockWriteGuard<'a, T> = LARwLockWriteGuard<'a, RawRwSpinlock, T>;
 /// An upgradable read guard for the read-write lock.
-pub type RwLockUpgradableReadGuard<'a, T> = LARwLockUpgradableReadGuard<'a, T>; 
+pub type RwLockUpgradableReadGuard<'a, T> = LARwLockUpgradableReadGuard<'a, RawRwSpinlock, T>; 
