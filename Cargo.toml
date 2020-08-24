@@ -3,6 +3,10 @@ name = "spinny"
 version = "0.1.0"
 authors = ["not_a_seagull <jtnunley01@gmail.com>"]
 edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "Spinlock-based RwLock struct, with lock_api"
+repository = "https://github.com/not-a-seagull/spinny"
+homepage = "https://github.com/not-a-seagull/spinny#readme"
 
 [dependencies]
 lock_api = "0.4.0"
