@@ -6,7 +6,7 @@
 #![warn(clippy::pedantic)]
 
 use core::sync::atomic::{spin_loop_hint, AtomicUsize, Ordering};
-use lock_api::{GuardSend, RawRwLock, RawRwLockDowngrade, RawRwLockUpgrade, RwLock as LARwLock};
+use lock_api::{GuardSend, RawRwLock, RawRwLockDowngrade, RawRwLockUpgrade, RwLock as LARwLock, RwLockReadGuard as LARwLockReadGuard, RwLockWriteGuard as LARwLockWriteGuard, RwLockUpgradableReadGuard as LARwLockUpgradableReadGuard};
 
 /// Raw spinlock rwlock, wrapped in the lock_api RwLock struct.
 pub struct RawRwSpinlock(AtomicUsize);
@@ -110,3 +110,9 @@ unsafe impl RawRwLockDowngrade for RawRwSpinlock {
 
 /// A read-write lock that uses a spinlock internally.
 pub type RwLock<T> = LARwLock<T, RawRwSpinlock>;
+/// A read guard for the read-write lock.
+pub type RwLockReadGuard<'a, T> = LARwLockReadGuard<'a, T>;
+/// A write guard fo the read-write lock.
+pub type RwLockWriteGuard<'a, T> = LARwLockWriteGuard<'a, T>;
+/// An upgradable read guard for the read-write lock.
+pub type RwLockUpgradableReadGuard<'a, T> = LARwLockUpgradableReadGuard<'a, T>; 
