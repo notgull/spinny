@@ -1,0 +1,13 @@
+[package]
+name = "spinny"
+version = "0.1.0"
+authors = ["not_a_seagull <jtnunley01@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+lock_api = "0.4.0"
+
+[features]
+default = []
+nightly = ["lock_api/nightly"]
+owning_ref = ["lock_api/owning_ref"]
