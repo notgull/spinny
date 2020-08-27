@@ -109,10 +109,18 @@ unsafe impl RawRwLockDowngrade for RawRwSpinlock {
 }
 
 /// A read-write lock that uses a spinlock internally.
-pub type RwLock<T> = LARwLock<T, RawRwSpinlock>;
+pub type RwLock<T> = LARwLock<RawRwSpinlock, T>;
 /// A read guard for the read-write lock.
 pub type RwLockReadGuard<'a, T> = LARwLockReadGuard<'a, RawRwSpinlock, T>;
 /// A write guard fo the read-write lock.
 pub type RwLockWriteGuard<'a, T> = LARwLockWriteGuard<'a, RawRwSpinlock, T>;
 /// An upgradable read guard for the read-write lock.
 pub type RwLockUpgradableReadGuard<'a, T> = LARwLockUpgradableReadGuard<'a, RawRwSpinlock, T>; 
+
+#[test]
+fn basics() {
+    let rwlock = RwLock::new(8);
+    assert_eq!(*rwlock.read(), 8);
+    *rwlock.write() = 7;
+    assert_eq!(*rwlock.read(), 7);
+}
