@@ -5,8 +5,19 @@
 #![no_std]
 #![warn(clippy::pedantic)]
 
+#[cfg(test)]
+extern crate std;
+
+use lock_api::{
+    GuardSend, RawRwLock, RawRwLockDowngrade, RawRwLockUpgrade, RwLock as LARwLock,
+    RwLockReadGuard as LARwLockReadGuard, RwLockUpgradableReadGuard as LARwLockUpgradableReadGuard,
+    RwLockWriteGuard as LARwLockWriteGuard,
+};
+
+#[cfg(not(loom))]
 use core::sync::atomic::{spin_loop_hint, AtomicUsize, Ordering};
-use lock_api::{GuardSend, RawRwLock, RawRwLockDowngrade, RawRwLockUpgrade, RwLock as LARwLock, RwLockReadGuard as LARwLockReadGuard, RwLockWriteGuard as LARwLockWriteGuard, RwLockUpgradableReadGuard as LARwLockUpgradableReadGuard};
+#[cfg(loom)]
+use loom::sync::atomic::{spin_loop_hint, AtomicUsize, Ordering};
 
 /// Raw spinlock rwlock, wrapped in the lock_api RwLock struct.
 pub struct RawRwSpinlock(AtomicUsize);
@@ -115,7 +126,7 @@ pub type RwLockReadGuard<'a, T> = LARwLockReadGuard<'a, RawRwSpinlock, T>;
 /// A write guard fo the read-write lock.
 pub type RwLockWriteGuard<'a, T> = LARwLockWriteGuard<'a, RawRwSpinlock, T>;
 /// An upgradable read guard for the read-write lock.
-pub type RwLockUpgradableReadGuard<'a, T> = LARwLockUpgradableReadGuard<'a, RawRwSpinlock, T>; 
+pub type RwLockUpgradableReadGuard<'a, T> = LARwLockUpgradableReadGuard<'a, RawRwSpinlock, T>;
 
 #[test]
 fn basics() {
@@ -123,4 +134,104 @@ fn basics() {
     assert_eq!(*rwlock.read(), 8);
     *rwlock.write() = 7;
     assert_eq!(*rwlock.read(), 7);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{RwLock, RwLockReadGuard, RwLockUpgradableReadGuard, RwLockWriteGuard};
+
+    #[cfg(loom)]
+    use loom::thread;
+    #[cfg(not(loom))]
+    use std::thread;
+
+    use std::vec::Vec;
+
+    // test multiple reads
+    fn multiread_kernel() {
+        let rwlock = RwLock::new(7);
+        let mut joiners = Vec::new();
+        for _ in 0..10 {
+            joiners.push(thread::spawn(|| {
+                let lock = rwlock.read();
+                assert_eq!(*lock, 7);
+            }));
+        }
+
+        joiners.into_iter().for_each(|j| j.join().unwrap());
+    }
+
+    #[cfg(loom)]
+    #[test]
+    fn multiread() {
+        loom::model(|| multiread_kernel());
+    }
+
+    #[cfg(not(loom))]
+    #[test]
+    fn multiread() {
+        multiread_kernel();
+    }
+
+    // test multiple writes
+    fn multiwrite_kernel() {
+        let rwlock = RwLock::new(0);
+        let mut joiners = Vec::new();
+        for _ in 0..10 {
+            joiners.push(thread::spawn(|| {
+                let lock = rwlock.write();
+                *lock += 1;
+            }));
+        }
+
+        joiners.into_iter().for_each(|j| j.join().unwrap());
+        assert_eq!(*rwlock.read(), 10);
+    }
+
+    #[cfg(loom)]
+    #[test]
+    fn multiwrite() {
+        loom::model(|| multiwrite_kernel());
+    }
+
+    #[cfg(not(loom))]
+    #[test]
+    fn multiwrite() {
+        multiwrite_kernel();
+    }
+
+    // test upgrading
+    fn upgrade_kernel() {
+        let rwlock = RwLock::new((false, 0));
+        let mut joiners = Vec::new();
+        for i in 0..12 {
+            joiners.push(thread::spawn(|| {
+                let lock = RwLock::upgradable_read(&rwlock);
+
+                // even numbers just read the lock, determine the first element is false, then return
+                if i & 1 == 0 {
+                    assert_eq!(*lock.0, false);
+                } else {
+                    // odd numbers increment the number
+                    let mut lock = RwLockUpgradableReadGuard::upgrade(lock);
+                    lock.1 += 1;
+                }
+            }));
+        }
+
+        joiners.into_iter().for_each(|j| j.join().unwrap());
+        assert_eq!(rwlock.read().0, 6);
+    }
+
+    #[cfg(loom)]
+    #[test]
+    fn upgrade() {
+        loom::model(|| upgrade_kernel());
+    }
+
+    #[cfg(not(loom))]
+    #[test]
+    fn upgrade() {
+        upgrade_kernel();
+    }
 }
