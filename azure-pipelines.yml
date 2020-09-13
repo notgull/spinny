@@ -19,7 +19,7 @@ jobs:
     - template: ci/install-rust.yml
       parameters:
         toolchain: $(toolchain)
-    - script: rustup component add clipy
+    - script: rustup component add clippy
       displayName: "Add Clippy"
     - bash: cargo test
       displayName: "Basic Test"
