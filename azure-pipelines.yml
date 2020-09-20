@@ -1,0 +1,27 @@
+trigger:
+  branches:
+    include: ['*']
+
+jobs:
+ - job:
+   displayName: "Build & Test"
+   strategy:
+     matrix:
+       Stable:
+         toolchain: stable
+       Beta:
+         toolchain: beta
+       Nightly:
+         toolchain: nightly
+   pool:
+     vmImage: ubuntu-latest
+   steps:
+    - template: ci/install-rust.yml
+      parameters:
+        toolchain: $(toolchain)
+    - script: rustup component add clippy
+      displayName: "Add Clippy"
+    - bash: cargo test
+      displayName: "Basic Test"
+    - bash: RUSTFLAGS="--cfg loom" cargo test
+      displayName: "Loom Test"
