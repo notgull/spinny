@@ -1,12 +1,12 @@
 [package]
 name = "spinny"
-version = "0.2.1"
-authors = ["not_a_seagull <jtnunley01@gmail.com>"]
+version = "0.2.2"
+authors = ["notgull <jtnunley01@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "Spinlock-based RwLock struct, with lock_api"
-repository = "https://github.com/not-a-seagull/spinny"
-homepage = "https://github.com/not-a-seagull/spinny#readme"
+repository = "https://github.com/notgull/spinny"
+homepage = "https://github.com/notgull/spinny#readme"
 
 [dependencies]
 lock_api = "0.4.0"
