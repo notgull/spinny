@@ -16,9 +16,15 @@ use lock_api::{
 };
 
 #[cfg(not(loom))]
-use core::sync::atomic::{spin_loop_hint, AtomicUsize, Ordering};
+use core::{
+    hint::spin_loop,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 #[cfg(loom)]
-use loom::sync::atomic::{spin_loop_hint, AtomicUsize, Ordering};
+use loom::{
+    hint::spin_loop,
+    sync::atomic::{AtomicUsize, Ordering},
+};
 #[cfg(loom)]
 use once_cell::sync::OnceCell;
 
@@ -61,7 +67,7 @@ unsafe impl RawRwLock for RawRwSpinlock {
 
     fn lock_shared(&self) {
         while !self.try_lock_shared() {
-            spin_loop_hint()
+            spin_loop()
         }
     }
 
@@ -91,7 +97,7 @@ unsafe impl RawRwLock for RawRwSpinlock {
                 Ordering::Relaxed,
             ) {
                 Ok(_) => return,
-                Err(_) => spin_loop_hint(),
+                Err(_) => spin_loop(),
             }
         }
     }
@@ -109,7 +115,7 @@ unsafe impl RawRwLock for RawRwSpinlock {
 unsafe impl RawRwLockUpgrade for RawRwSpinlock {
     fn lock_upgradable(&self) {
         while !self.try_lock_upgradable() {
-            spin_loop_hint()
+            spin_loop()
         }
     }
 
@@ -132,7 +138,7 @@ unsafe impl RawRwLockUpgrade for RawRwSpinlock {
                 Ordering::Relaxed,
             ) {
                 Ok(_) => return,
-                Err(_) => spin_loop_hint(),
+                Err(_) => spin_loop(),
             }
         }
     }
