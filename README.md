@@ -1,5 +1,7 @@
 # spinny
 
+## This crate is now deprecated in favor of [`spin`](https://crates.io/crates/spin), which is now maintained again.
+
 [![Build Status](https://dev.azure.com/jtnunley01/Beetle/_apis/build/status/not-a-seagull.spinny?branchName=master)](https://dev.azure.com/jtnunley01/Beetle/_build/latest?definitionId=6&branchName=master)
 [![crates.io](https://img.shields.io/crates/v/spinny)](https://crates.io/crates/spinny)
 [![docs.rs](https://docs.rs/spinny/badge.svg)](https://docs.rs/spinny)

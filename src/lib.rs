@@ -1,10 +1,15 @@
 // MIT/Apache2 License
 
-//! Implementation of a basic spin-based RwLock
+//! Implementation of a basic spin-based RwLock.
+//! 
+//! ## This is now deprecated in favor of [`spin-rs`].
+//! 
+//! [`spin-rs`]: https://crates.io/crates/spin
 
 #![no_std]
 #![warn(clippy::pedantic)]
 #![allow(clippy::same_item_push)]
+#![deprecated(since = "0.2.4", note = "Use spin-rs instead")]
 
 #[cfg(any(test, loom))]
 extern crate std;
